@@ -1,18 +1,43 @@
+use std::io;
 use std::process::Command;
 
 fn main() {
-    // let status = Command::new("mkdir")
-    //     .arg("neues_verzeichnis")
-    //     .status()
-    //     .expect("Konnte mkdir nicht ausführen");
+    loop {
+        let mut theme = String::new();
+        println!("Enter theme (light, dark, both): ");
+        io::stdin()
+            .read_line(&mut theme)
+            .expect("Failed to read line");
 
-    // if status.success() {
-    //     println!("Verzeichnis wurde erfolgreich erstellt.");
-    // } else {
-    //     eprintln!("Fehler beim Erstellen des Verzeichnisses.");
-    // }
+        let theme = match Theme::from_input(&theme) {
+            Ok(theme) => theme,
+            Err(e) => {
+                eprintln!("{}", e);
+                continue;
+            }
+        };
+
+        break;
+    }
 
     markdown_to_html();
+}
+
+enum Theme {
+    Light,
+    Dark,
+    Both,
+}
+
+impl Theme {
+    fn from_input(input: &str) -> Result<Theme, String> {
+        match input.trim().to_lowercase().as_str() {
+            "light" => Ok(Theme::Light),
+            "dark" => Ok(Theme::Dark),
+            "both" => Ok(Theme::Both),
+            _ => Err("Invalid theme".to_string()),
+        }
+    }
 }
 
 fn markdown_to_html() {
