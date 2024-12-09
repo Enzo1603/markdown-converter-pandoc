@@ -4,9 +4,15 @@ use std::io::Write;
 use std::process::Command;
 
 fn main() {
-    get_theme();
+    let theme = get_theme();
 
-    markdown_to_html();
+    match theme {
+        Theme::Light | Theme::Dark => markdown_to_html(&theme),
+        Theme::Both => {
+            markdown_to_html(&Theme::Dark);
+            markdown_to_html(&Theme::Light);
+        }
+    }
 }
 
 enum Theme {
@@ -50,17 +56,29 @@ fn get_theme() -> Theme {
     }
 }
 
-fn markdown_to_html() {
+fn markdown_to_html(theme: &Theme) {
+    let output = match theme {
+        Theme::Light => "output_light.html",
+        Theme::Dark => "output_dark.html",
+        Theme::Both => panic!("Invalid theme"),
+    };
+
+    let markdown_css = match theme {
+        Theme::Light => "github-markdown-light.css",
+        Theme::Dark => "github-markdown-dark.css",
+        Theme::Both => panic!("Invalid theme"),
+    };
+
     let status = Command::new("pandoc")
         .arg("VPS-Setup.md")
         .arg("-o")
-        .arg("output_dark.html")
+        .arg(output)
         .arg("--standalone")
         .arg("--embed-resources")
         .arg("--template")
         .arg("github-markdown-template.html")
         .arg("--css")
-        .arg("github-markdown-dark.css")
+        .arg(markdown_css)
         .status()
         .expect("Could not execute pandoc");
 
