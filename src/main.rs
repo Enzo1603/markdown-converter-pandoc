@@ -63,22 +63,34 @@ fn markdown_to_html(theme: &Theme) {
         Theme::Both => panic!("Invalid theme"),
     };
 
+    let output = format!("output/{}", output);
+
+    Command::new("mkdir")
+        .arg("output")
+        .status()
+        .expect("Could not create output directory");
+
     let markdown_css = match theme {
         Theme::Light => "github-markdown-light.css",
         Theme::Dark => "github-markdown-dark.css",
         Theme::Both => panic!("Invalid theme"),
     };
+    let markdown_css = format!("statis/markdown-css/{}", markdown_css);
 
+    run_pandoc("VPS-Setup.md", &output, &markdown_css);
+}
+
+fn run_pandoc(input: &str, output: &str, css: &str) {
     let status = Command::new("pandoc")
-        .arg("VPS-Setup.md")
+        .arg(input)
         .arg("-o")
         .arg(output)
         .arg("--standalone")
         .arg("--embed-resources")
         .arg("--template")
-        .arg("github-markdown-template.html")
+        .arg("templates/github-markdown-template.html")
         .arg("--css")
-        .arg(markdown_css)
+        .arg(css)
         .status()
         .expect("Could not execute pandoc");
 
