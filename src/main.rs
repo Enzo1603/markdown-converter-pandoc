@@ -74,10 +74,14 @@ fn markdown_to_html(theme: &Theme) {
     let markdown_css = format!("static/markdown-css/{}", markdown_css);
 
     let current_dir = env::current_dir().expect("Could not get current directory");
+
     let templates_dir = current_dir.join("templates");
     let template = templates_dir.join("github-markdown-template.html");
 
-    run_pandoc("VPS-Setup.md", &output, &markdown_css, &template);
+    let input_dir = current_dir.join("input");
+    let input = input_dir.join("VPS-Setup.md");
+
+    run_pandoc(&input, &output, &markdown_css, &template);
 }
 
 fn create_output_dir() -> PathBuf {
@@ -99,7 +103,7 @@ fn create_output_dir() -> PathBuf {
     output_dir
 }
 
-fn run_pandoc(input: &str, output: &PathBuf, css: &str, template: &PathBuf) {
+fn run_pandoc(input: &PathBuf, output: &PathBuf, css: &str, template: &PathBuf) {
     let status = Command::new("pandoc")
         .arg(input)
         .arg("-o")
