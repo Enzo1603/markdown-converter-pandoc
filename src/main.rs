@@ -1,7 +1,8 @@
 use colored::*;
-use std::io;
 use std::io::Write;
+use std::path::PathBuf;
 use std::process::Command;
+use std::{env, fs, io};
 
 fn main() {
     let theme = get_theme();
@@ -57,30 +58,48 @@ fn get_theme() -> Theme {
 }
 
 fn markdown_to_html(theme: &Theme) {
+    let output_dir = create_output_dir();
+
     let output = match theme {
-        Theme::Light => "output_light.html",
-        Theme::Dark => "output_dark.html",
+        Theme::Light => output_dir.join("output_light.html"),
+        Theme::Dark => output_dir.join("output_dark.html"),
         Theme::Both => panic!("Invalid theme"),
     };
-
-    let output = format!("output/{}", output);
-
-    Command::new("mkdir")
-        .arg("output")
-        .status()
-        .expect("Could not create output directory");
 
     let markdown_css = match theme {
         Theme::Light => "github-markdown-light.css",
         Theme::Dark => "github-markdown-dark.css",
         Theme::Both => panic!("Invalid theme"),
     };
-    let markdown_css = format!("statis/markdown-css/{}", markdown_css);
+    let markdown_css = format!("static/markdown-css/{}", markdown_css);
 
-    run_pandoc("VPS-Setup.md", &output, &markdown_css);
+    let current_dir = env::current_dir().expect("Could not get current directory");
+    let templates_dir = current_dir.join("templates");
+    let template = templates_dir.join("github-markdown-template.html");
+
+    run_pandoc("VPS-Setup.md", &output, &markdown_css, &template);
 }
 
-fn run_pandoc(input: &str, output: &str, css: &str) {
+fn create_output_dir() -> PathBuf {
+    let current_dir = env::current_dir().expect("Could not get current directory");
+
+    let output_dir = current_dir.join("output");
+
+    match fs::create_dir(&output_dir) {
+        Ok(_) => println!("Created output directory."),
+        Err(e) => {
+            if e.kind() == io::ErrorKind::AlreadyExists {
+                println!("Output directory already exists.");
+            } else {
+                eprintln!("{} {}", "Could not create output directory:".red(), e);
+            }
+        }
+    }
+
+    output_dir
+}
+
+fn run_pandoc(input: &str, output: &PathBuf, css: &str, template: &PathBuf) {
     let status = Command::new("pandoc")
         .arg(input)
         .arg("-o")
@@ -88,7 +107,7 @@ fn run_pandoc(input: &str, output: &str, css: &str) {
         .arg("--standalone")
         .arg("--embed-resources")
         .arg("--template")
-        .arg("templates/github-markdown-template.html")
+        .arg(template)
         .arg("--css")
         .arg(css)
         .status()
