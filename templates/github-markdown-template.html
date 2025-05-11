@@ -9,6 +9,29 @@
   <!-- Code Syntax Highlighting, Pandoc Default Pygments -->
   <link rel="stylesheet" href="./static/css/pandoc-pygments.css">
 
+  <style media="print">
+    @page {
+      margin: 0.5cm;
+      /* Reduzierte Ränder */
+      size: A4;
+    }
+
+    body {
+      margin: 0.5cm;
+      background-color: #0d1117 !important;
+      /* Für Dark Mode */
+      color: #c9d1d9 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .theme-switch {
+      display: none !important;
+      /* Theme-Switch in PDFs ausblenden */
+    }
+  </style>
+
+
   <style>
     body {
       box-sizing: border-box;
